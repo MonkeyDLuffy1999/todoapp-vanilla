@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo App (React)</title>
+    <link rel="stylesheet" href="../vanilla-version/style.css" />
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      
+      function loadTodos() {
+        console.log("READING storage");
+        const stored = localStorage.getItem('todos');
+        return stored ? JSON.parse(stored) : [];
+      }
+
+      function TodoApp() {
+        console.log("RENDER");
+        const [todoText, setTodoText] = React.useState("");
+        const [todos, setTodos] = React.useState(loadTodos);
+
+        React.useEffect(() => {
+          console.log("SAVING to storage");
+          localStorage.setItem('todos', JSON.stringify(todos));
+        }, [todos]);
+        
+        return (
+          <main>
+            <h1>My Todos</h1>
+            <input type="text" value={todoText} onChange={(e) => setTodoText(e.target.value)} />
+            <button onClick={() => {setTodos([...todos, {id: crypto.randomUUID(), value: todoText, done: false}]); setTodoText('');}}>Add Todo</button>
+            <ul>
+              {todos.map(todo => 
+                <li key={todo.id}> 
+                  <input type="checkbox" checked={todo.done} onChange={() => setTodos(todos.map(t => t.id === todo.id ? {...t, done: !t.done} : t))} />
+                  <span style={{textDecoration: todo.done ? 'line-through' : 'none'}}> {todo.value} </span> 
+                  <button onClick={() => setTodos(todos.filter(t => t.id !== todo.id))}> x </button>
+                </li>)}
+            </ul>
+          </main>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<TodoApp />);
+    </script>
+  </body>
+</html>
